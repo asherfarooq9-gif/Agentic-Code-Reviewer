@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# venv / uv
+.venv/
+
+# env + secrets
+.env
+
+# sqlite db
+*.db
+*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
