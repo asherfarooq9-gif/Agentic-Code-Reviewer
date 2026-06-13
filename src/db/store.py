@@ -50,6 +50,15 @@ class Store:
         )
         self._conn.commit()
 
+    def update_review_tokens(
+        self, review_id: int, input_tokens: int, output_tokens: int
+    ) -> None:
+        self._conn.execute(
+            "UPDATE reviews SET input_tokens = ?, output_tokens = ? WHERE id = ?",
+            (input_tokens, output_tokens, review_id),
+        )
+        self._conn.commit()
+
     def get_review(self, review_id: int) -> Review | None:
         row = self._conn.execute(
             "SELECT * FROM reviews WHERE id = ?", (review_id,)

@@ -12,11 +12,25 @@
 
 **Done when:** can fetch any public PR diff via CLI. ✅
 
-## M2: Single-Agent Reviewer (next)
-- [ ] Orchestrator agent (single pass)
-- [ ] Prompt: analyze diff -> JSON findings
-- [ ] Post findings as GitHub review comments
-- [ ] CLI: `arev review --pr <url>`
-- [ ] Store review + findings in DB
+## M2: Single-Agent Reviewer
+- [x] Orchestrator agent (single pass) — `agents/orchestrator.py`
+- [x] Prompt: analyze diff -> JSON findings — `llm/prompts/reviewer.py`
+- [x] Diff annotation with new-side line numbers — `agents/annotate.py`
+- [x] Robust JSON extraction + per-entry validation (skip bad, no crash)
+- [x] Post findings as GitHub review comments — `github/review_poster.py`
+- [x] CLI: `arev review --pr <url> [--post] [--deep]`
+- [x] Store review + findings + token usage in DB
+- [x] Tests: annotate, orchestrator (clean/fenced/prose/malformed), review_poster
 
-(See ROADMAP for M3–M8.)
+**Done when:** runs end-to-end on real PR, posts comments.
+Local proof: 31 tests pass, ruff clean, CLI wired. End-to-end on a live PR
+needs real ANTHROPIC_API_KEY + GITHUB_TOKEN (user step):
+`uv run arev review --pr <url> --post`
+
+## M3: Multi-Agent Specialists (next)
+- [ ] Split into bug / security / perf / style specialists (asyncio.gather)
+- [ ] Per-specialist focused prompts + few-shot
+- [ ] Orchestrator deduplicates findings
+- [ ] Confidence via cross-agent agreement
+
+(See ROADMAP for M4–M8.)
