@@ -9,6 +9,8 @@ from .config import load_settings
 from .db.migrate import run_migrations
 from .db.models import ReviewStatus
 from .db.store import Store
+from .eval.dataset import load_cases
+from .eval.runner import run_eval
 from .github.client import GitHubClient, parse_pr_url
 from .github.diff_parser import parse_diff
 from .github.review_poster import post_review
@@ -100,6 +102,40 @@ def review(
 
     store.close()
     typer.echo(f"tokens in/out: {usage.input_tokens}/{usage.output_tokens}")
+
+
+@app.command("eval")
+def eval_suite(
+    cases: str = typer.Option(
+        "eval_data/cases", "--cases", help="Directory of labelled eval cases"
+    ),
+    multi: bool = typer.Option(True, "--multi/--single", help="Multi-agent or single pass"),
+    deep: bool = typer.Option(False, "--deep", help="Use the deep model"),
+    tol: int = typer.Option(3, "--tol", help="Line-number match tolerance"),
+) -> None:
+    """Run the eval suite against ground-truth labels; print precision/recall/F1."""
+    settings = load_settings()
+    configure_logging(settings.log_level)
+    suite = load_cases(cases)
+    llm_client = OllamaClient(
+        settings.ollama_host, settings.model_default, settings.model_deep
+    )
+    reviewer = review_diff_multi if multi else review_diff
+    report = run_eval(suite, reviewer, llm_client, deep=deep, line_tolerance=tol)
+
+    mode = "multi" if multi else "single"
+    typer.echo(f"Eval: {len(suite)} case(s) [{mode}]")
+    for result in report.per_case:
+        m = result.metrics
+        typer.echo(
+            f"  {result.case_id}: P={m.precision:.2f} R={m.recall:.2f} "
+            f"F1={m.f1:.2f} (tp={m.tp} fp={m.fp} fn={m.fn})"
+        )
+    o = report.overall
+    typer.echo(
+        f"OVERALL: P={o.precision:.2f} R={o.recall:.2f} F1={o.f1:.2f} "
+        f"(tp={o.tp} fp={o.fp} fn={o.fn})"
+    )
 
 
 @app.command("init-db")

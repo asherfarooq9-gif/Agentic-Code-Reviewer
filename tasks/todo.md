@@ -38,8 +38,20 @@ needs real ANTHROPIC_API_KEY + GITHUB_TOKEN (user step):
 **Done when:** parallel agents, dedup works, severity assigned.
 Local proof: 39 tests pass, ruff clean. Live run needs Ollama + a real PR.
 
-## M4: Context Gathering (next)
+## M5: Eval Framework
+- [x] Labelled eval cases (buggy diff + ground-truth findings) — `eval_data/cases/*.json`
+- [x] Dataset loader — `eval/dataset.py`
+- [x] Metrics: precision / recall / F1, tp/fp/fn matching by file+line+category — `eval/metrics.py`
+- [x] Eval runner over cases, single vs multi — `eval/runner.py`
+- [x] CLI: `arev eval [--multi/--single] [--tol N]`
+- [x] Tests: metrics (match/tolerance/category/combine), runner+dataset
+
+**Done when:** benchmark report with numbers.
+Local proof: 49 tests pass, ruff clean. Real numbers need Ollama running
+(`arev eval`). Seed set is 2 cases; expand toward 30-50 real buggy PRs later.
+
+## M4: Context Gathering (deferred — skipped to build M5 first)
 - [ ] Tools: read_file, search_codebase, get_function_callers
 - [ ] Agent gathers context before flagging -> fewer false positives
 
-(See ROADMAP for M5–M8.)
+(See ROADMAP for M6–M8.)

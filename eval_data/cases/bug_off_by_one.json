@@ -1,0 +1,8 @@
+{
+  "id": "bug-off-by-one",
+  "description": "last_index now returns len(items) instead of len(items) - 1, causing an off-by-one / index error.",
+  "diff": "diff --git a/range.py b/range.py\n--- a/range.py\n+++ b/range.py\n@@ -1,2 +1,2 @@\n def last_index(items):\n-    return len(items) - 1\n+    return len(items)\n",
+  "expected": [
+    {"file": "range.py", "line": 2, "category": "bug"}
+  ]
+}
