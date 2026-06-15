@@ -7,18 +7,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime settings. Required secrets fail fast at load time."""
+    """Runtime settings. Required values fail fast at load time."""
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    anthropic_api_key: str
     github_token: str
     db_path: str = "./reviewer.db"
     log_level: str = "INFO"
-    model_default: str = "claude-haiku-4-5-20251001"
-    model_deep: str = "claude-opus-4-8"
+    ollama_host: str = "http://localhost:11434"
+    model_default: str = "qwen2.5-coder:7b"
+    model_deep: str = "qwen2.5-coder:14b"
 
 
 @lru_cache

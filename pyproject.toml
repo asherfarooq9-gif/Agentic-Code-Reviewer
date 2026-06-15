@@ -5,12 +5,12 @@ description = "AI agent that reviews GitHub PRs — finds bugs, security, and pe
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.40",
     "PyGithub>=2.5",
     "unidiff>=0.7.5",
     "pydantic-settings>=2.6",
     "typer>=0.15",
     "requests>=2.32",
+    "ollama>=0.6.2",
 ]
 
 [project.scripts]

@@ -11,7 +11,7 @@ from .db.store import Store
 from .github.client import GitHubClient, parse_pr_url
 from .github.diff_parser import parse_diff
 from .github.review_poster import post_review
-from .llm.claude_client import ClaudeClient
+from .llm.ollama_client import OllamaClient
 from .logging import configure_logging
 
 app = typer.Typer(help="Agentic Code Reviewer CLI", no_args_is_help=True)
@@ -55,15 +55,15 @@ def review(
     diff = gh.fetch_diff(pr)
     files = parse_diff(diff)
 
-    claude = ClaudeClient(
-        settings.anthropic_api_key, settings.model_default, settings.model_deep
+    llm_client = OllamaClient(
+        settings.ollama_host, settings.model_default, settings.model_deep
     )
 
     store = Store(settings.db_path)
     review_row = store.create_review(pr, f"{owner}/{repo}", number)
     store.update_review_status(review_row.id, ReviewStatus.RUNNING)
     try:
-        findings, usage = review_diff(files, claude, deep=deep)
+        findings, usage = review_diff(files, llm_client, deep=deep)
         for f in findings:
             store.add_finding(
                 review_row.id,

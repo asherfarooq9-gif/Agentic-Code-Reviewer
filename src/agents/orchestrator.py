@@ -1,4 +1,4 @@
-"""Single-pass reviewer orchestrator: diff -> Claude -> validated findings."""
+"""Single-pass reviewer orchestrator: diff -> local LLM -> validated findings."""
 from __future__ import annotations
 
 import json
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from ..db.models import Category, Severity
 from ..github.diff_parser import ParsedFile
-from ..llm.claude_client import ClaudeClient, TokenUsage
+from ..llm.ollama_client import OllamaClient, TokenUsage
 from ..llm.prompts.reviewer import SYSTEM_PROMPT, build_user_prompt
 from .annotate import annotate_diff
 
@@ -79,12 +79,12 @@ def parse_findings(raw_text: str) -> list[ReviewFinding]:
 
 
 def review_diff(
-    files: list[ParsedFile], claude: ClaudeClient, *, deep: bool = False
+    files: list[ParsedFile], llm_client: OllamaClient, *, deep: bool = False
 ) -> tuple[list[ReviewFinding], TokenUsage]:
     """Run one reviewer pass over the parsed diff. Returns (findings, usage)."""
     annotated = annotate_diff(files)
     user_prompt = build_user_prompt(annotated)
-    text, usage = claude.complete(
+    text, usage = llm_client.complete(
         [{"role": "user", "content": user_prompt}],
         deep=deep,
         max_tokens=_MAX_TOKENS,

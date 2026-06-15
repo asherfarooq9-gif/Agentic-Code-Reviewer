@@ -3,7 +3,7 @@ import pytest
 from src.agents.orchestrator import parse_findings, review_diff
 from src.db.models import Category, Severity
 from src.github.diff_parser import parse_diff
-from src.llm.claude_client import TokenUsage
+from src.llm.ollama_client import TokenUsage
 
 CLEAN = (
     '[{"file":"a.py","line":3,"severity":"high","category":"bug",'
@@ -48,7 +48,7 @@ def test_parse_no_array_raises():
         parse_findings("no json here")
 
 
-class _FakeClaude:
+class _FakeLLM:
     def __init__(self, text: str) -> None:
         self._text = text
         self.calls: list[dict] = []
@@ -67,7 +67,7 @@ def test_review_diff_end_to_end():
 +x = 2
  y = 3
 """
-    fake = _FakeClaude(CLEAN)
+    fake = _FakeLLM(CLEAN)
     findings, usage = review_diff(parse_diff(diff), fake)
     assert len(findings) == 1
     assert usage.input_tokens == 100
