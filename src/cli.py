@@ -4,6 +4,7 @@ from __future__ import annotations
 import typer
 
 from .agents.orchestrator import review_diff
+from .agents.specialists import review_diff_multi
 from .config import load_settings
 from .db.migrate import run_migrations
 from .db.models import ReviewStatus
@@ -45,8 +46,11 @@ def review(
     pr: str = typer.Option(..., "--pr", help="GitHub PR URL"),
     post: bool = typer.Option(False, "--post/--no-post", help="Post comments to the PR"),
     deep: bool = typer.Option(False, "--deep", help="Use the deep model"),
+    multi: bool = typer.Option(
+        True, "--multi/--single", help="Use 4 specialist agents (default) or a single pass"
+    ),
 ) -> None:
-    """Review a PR diff (single agent pass), store findings, optionally post."""
+    """Review a PR diff, store findings, optionally post comments."""
     settings = load_settings()
     configure_logging(settings.log_level)
     owner, repo, number = parse_pr_url(pr)
@@ -63,7 +67,8 @@ def review(
     review_row = store.create_review(pr, f"{owner}/{repo}", number)
     store.update_review_status(review_row.id, ReviewStatus.RUNNING)
     try:
-        findings, usage = review_diff(files, llm_client, deep=deep)
+        run = review_diff_multi if multi else review_diff
+        findings, usage = run(files, llm_client, deep=deep)
         for f in findings:
             store.add_finding(
                 review_row.id,
@@ -82,10 +87,12 @@ def review(
         store.close()
         raise
 
-    typer.echo(f"PR {owner}/{repo}#{number} — {len(findings)} finding(s)")
+    mode = "multi-agent" if multi else "single-agent"
+    typer.echo(f"PR {owner}/{repo}#{number} — {len(findings)} finding(s) [{mode}]")
     for f in findings:
         loc = f"{f.file}:{f.line}" if f.line is not None else f.file
-        typer.echo(f"  [{f.severity.value}/{f.category.value}] {loc} — {f.message}")
+        conf = f" ({f.confidence:.2f})" if f.confidence is not None else ""
+        typer.echo(f"  [{f.severity.value}/{f.category.value}] {loc}{conf} — {f.message}")
 
     if post:
         posted = post_review(gh, pr, findings)
