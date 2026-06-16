@@ -139,6 +139,27 @@ class Store:
             for r in rows
         ]
 
+    def list_reviews_with_counts(self, limit: int = 50) -> list[dict]:
+        rows = self._conn.execute(
+            "SELECT r.*, "
+            "(SELECT COUNT(*) FROM findings f WHERE f.review_id = r.id) AS findings_count "
+            "FROM reviews r ORDER BY r.id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def severity_distribution(self) -> dict[str, int]:
+        rows = self._conn.execute(
+            "SELECT severity, COUNT(*) AS c FROM findings GROUP BY severity"
+        ).fetchall()
+        return {row["severity"]: row["c"] for row in rows}
+
+    def count_reviews(self) -> int:
+        return self._conn.execute("SELECT COUNT(*) FROM reviews").fetchone()[0]
+
+    def count_findings(self) -> int:
+        return self._conn.execute("SELECT COUNT(*) FROM findings").fetchone()[0]
+
     def record_metric(
         self, name: str, value: float, *, review_id: int | None = None
     ) -> Metric:

@@ -5,9 +5,12 @@ import json
 import logging
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response
+from fastapi.responses import HTMLResponse
 
 from ..config import load_settings
+from ..db.store import Store
 from ..github.webhook import parse_pull_request_event, verify_signature
+from .dashboard import DASHBOARD_HTML
 
 logger = logging.getLogger("agentic_reviewer.api")
 
@@ -40,6 +43,43 @@ def create_app() -> FastAPI:
     @app.get("/healthz")
     def healthz() -> dict:
         return {"status": "ok"}
+
+    @app.get("/", response_class=HTMLResponse)
+    def dashboard() -> str:
+        return DASHBOARD_HTML
+
+    @app.get("/api/reviews")
+    def api_reviews() -> dict:
+        with Store(load_settings().db_path) as store:
+            return {"reviews": store.list_reviews_with_counts()}
+
+    @app.get("/api/reviews/{review_id}/findings")
+    def api_findings(review_id: int) -> dict:
+        with Store(load_settings().db_path) as store:
+            findings = store.list_findings(review_id)
+        return {
+            "findings": [
+                {
+                    "file": f.file,
+                    "line": f.line,
+                    "severity": f.severity.value,
+                    "category": f.category.value,
+                    "message": f.message,
+                    "suggested_fix": f.suggested_fix,
+                    "confidence": f.confidence,
+                }
+                for f in findings
+            ]
+        }
+
+    @app.get("/api/stats")
+    def api_stats() -> dict:
+        with Store(load_settings().db_path) as store:
+            return {
+                "total_reviews": store.count_reviews(),
+                "total_findings": store.count_findings(),
+                "by_severity": store.severity_distribution(),
+            }
 
     @app.post("/webhook")
     async def webhook(request: Request, background: BackgroundTasks):

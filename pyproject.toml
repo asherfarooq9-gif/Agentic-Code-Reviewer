@@ -34,6 +34,10 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# Embedded HTML/JS dashboard blob — line length not meaningful for a markup string.
+"src/api/dashboard.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
