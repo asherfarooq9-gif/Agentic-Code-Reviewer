@@ -10,6 +10,8 @@ from ..github.diff_parser import ParsedFile
 from ..llm.ollama_client import OllamaClient, TokenUsage
 from ..llm.prompts.reviewer import SYSTEM_PROMPT, build_user_prompt
 from .annotate import annotate_diff
+from .context import gather_context
+from .tools import CodebaseTools
 
 logger = logging.getLogger("agentic_reviewer.orchestrator")
 
@@ -79,11 +81,20 @@ def parse_findings(raw_text: str) -> list[ReviewFinding]:
 
 
 def review_diff(
-    files: list[ParsedFile], llm_client: OllamaClient, *, deep: bool = False
+    files: list[ParsedFile],
+    llm_client: OllamaClient,
+    *,
+    deep: bool = False,
+    tools: CodebaseTools | None = None,
 ) -> tuple[list[ReviewFinding], TokenUsage]:
-    """Run one reviewer pass over the parsed diff. Returns (findings, usage)."""
+    """Run one reviewer pass over the parsed diff. Returns (findings, usage).
+
+    If `tools` is provided, surrounding-code context is gathered first to
+    reduce false positives.
+    """
     annotated = annotate_diff(files)
-    user_prompt = build_user_prompt(annotated)
+    context = gather_context(tools, files) if tools is not None else None
+    user_prompt = build_user_prompt(annotated, context)
     text, usage = llm_client.complete(
         [{"role": "user", "content": user_prompt}],
         deep=deep,

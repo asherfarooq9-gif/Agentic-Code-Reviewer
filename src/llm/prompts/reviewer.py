@@ -24,10 +24,16 @@ Output a JSON array and nothing else. Each element:
 If there are no problems, output []."""
 
 
-def build_user_prompt(annotated_diff: str) -> str:
+def build_user_prompt(annotated_diff: str, context: str | None = None) -> str:
+    context_block = (
+        f"\nSurrounding code for context (do not review unchanged lines):\n{context}\n"
+        if context
+        else ""
+    )
     return (
         "Review the following annotated PR diff. Each changed line is prefixed with "
         "its new-side line number.\n\n"
-        f"{annotated_diff}\n\n"
+        f"{annotated_diff}\n"
+        f"{context_block}\n"
         "Return ONLY the JSON array of findings."
     )

@@ -12,7 +12,9 @@ from ..llm.prompts.reviewer import build_user_prompt
 from ..llm.prompts.specialists import SPECIALIST_PROMPTS
 from .aggregate import aggregate
 from .annotate import annotate_diff
+from .context import gather_context
 from .orchestrator import ReviewFinding, parse_findings
+from .tools import CodebaseTools
 
 logger = logging.getLogger("agentic_reviewer.specialists")
 
@@ -43,9 +45,13 @@ async def _run_one(
 
 
 async def _run_all(
-    files: list[ParsedFile], llm_client: OllamaClient, deep: bool
+    files: list[ParsedFile],
+    llm_client: OllamaClient,
+    deep: bool,
+    tools: CodebaseTools | None,
 ) -> tuple[list[ReviewFinding], TokenUsage]:
-    user_prompt = build_user_prompt(annotate_diff(files))
+    context = gather_context(tools, files) if tools is not None else None
+    user_prompt = build_user_prompt(annotate_diff(files), context)
     tasks = [
         _run_one(category, prompt, user_prompt, llm_client, deep)
         for category, prompt in SPECIALIST_PROMPTS.items()
@@ -64,10 +70,14 @@ async def _run_all(
 
 
 def review_diff_multi(
-    files: list[ParsedFile], llm_client: OllamaClient, *, deep: bool = False
+    files: list[ParsedFile],
+    llm_client: OllamaClient,
+    *,
+    deep: bool = False,
+    tools: CodebaseTools | None = None,
 ) -> tuple[list[ReviewFinding], TokenUsage]:
     """Run all specialists concurrently, dedup + score, return (findings, usage)."""
-    raw_findings, usage = asyncio.run(_run_all(files, llm_client, deep))
+    raw_findings, usage = asyncio.run(_run_all(files, llm_client, deep, tools))
     findings = aggregate(raw_findings)
     logger.info("Multi-agent review produced %d finding(s)", len(findings))
     return findings, usage

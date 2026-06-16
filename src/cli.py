@@ -5,6 +5,7 @@ import typer
 
 from .agents.orchestrator import review_diff
 from .agents.specialists import review_diff_multi
+from .agents.tools import CodebaseTools
 from .config import load_settings
 from .db.migrate import run_migrations
 from .db.models import ReviewStatus
@@ -51,6 +52,9 @@ def review(
     multi: bool = typer.Option(
         True, "--multi/--single", help="Use 4 specialist agents (default) or a single pass"
     ),
+    repo_path: str = typer.Option(
+        "", "--repo-path", help="Local checkout of the repo, to gather surrounding-code context"
+    ),
 ) -> None:
     """Review a PR diff, store findings, optionally post comments."""
     settings = load_settings()
@@ -64,13 +68,14 @@ def review(
     llm_client = OllamaClient(
         settings.ollama_host, settings.model_default, settings.model_deep
     )
+    tools = CodebaseTools(repo_path) if repo_path else None
 
     store = Store(settings.db_path)
     review_row = store.create_review(pr, f"{owner}/{repo}", number)
     store.update_review_status(review_row.id, ReviewStatus.RUNNING)
     try:
         run = review_diff_multi if multi else review_diff
-        findings, usage = run(files, llm_client, deep=deep)
+        findings, usage = run(files, llm_client, deep=deep, tools=tools)
         for f in findings:
             store.add_finding(
                 review_row.id,
