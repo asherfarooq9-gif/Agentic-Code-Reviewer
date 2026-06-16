@@ -1,0 +1,12 @@
+{
+  "id": "bug-none-dereference",
+  "description": "None guard removed before attribute access; raises AttributeError when user is None.",
+  "diff": "diff --git a/auth.py b/auth.py\n--- a/auth.py\n+++ b/auth.py\n@@ -1,4 +1,2 @@\n def get_username(user):\n-    if user is not None:\n-        return user.name\n-    return \"anonymous\"\n+    return user.name\n",
+  "expected": [
+    {
+      "file": "auth.py",
+      "line": 2,
+      "category": "bug"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "perf-n-plus-one",
+  "description": "`select_related('author')` removed \u2014 accessing p.author in the comprehension fires one query per post.",
+  "diff": "diff --git a/posts.py b/posts.py\n--- a/posts.py\n+++ b/posts.py\n@@ -1,3 +1,3 @@\n def get_posts_with_authors(post_ids):\n-    posts = Post.objects.filter(id__in=post_ids).select_related(\"author\")\n+    posts = Post.objects.filter(id__in=post_ids)\n     return [(p.title, p.author.name) for p in posts]\n",
+  "expected": [
+    {
+      "file": "posts.py",
+      "line": 2,
+      "category": "performance"
+    }
+  ]
+}

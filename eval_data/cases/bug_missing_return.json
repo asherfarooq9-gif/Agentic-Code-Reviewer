@@ -1,0 +1,12 @@
+{
+  "id": "bug-missing-return",
+  "description": "Return statement replaced with assignment; function now returns None instead of the computed result.",
+  "diff": "diff --git a/validators.py b/validators.py\n--- a/validators.py\n+++ b/validators.py\n@@ -1,2 +1,2 @@\n def is_valid_email(email):\n-    return \"@\" in email and \".\" in email\n+    result = \"@\" in email and \".\" in email\n",
+  "expected": [
+    {
+      "file": "validators.py",
+      "line": 1,
+      "category": "bug"
+    }
+  ]
+}

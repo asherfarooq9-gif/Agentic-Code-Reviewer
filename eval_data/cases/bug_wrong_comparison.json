@@ -1,0 +1,12 @@
+{
+  "id": "bug-wrong-comparison",
+  "description": "Upper-bound clamp check changed from `>` to `<`; values above maximum are never clamped.",
+  "diff": "diff --git a/math_utils.py b/math_utils.py\n--- a/math_utils.py\n+++ b/math_utils.py\n@@ -1,6 +1,6 @@\n def clamp(value, minimum, maximum):\n     if value < minimum:\n         return minimum\n-    if value > maximum:\n+    if value < maximum:\n         return maximum\n     return value\n",
+  "expected": [
+    {
+      "file": "math_utils.py",
+      "line": 4,
+      "category": "bug"
+    }
+  ]
+}

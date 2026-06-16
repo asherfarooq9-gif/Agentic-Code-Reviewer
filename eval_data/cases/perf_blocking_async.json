@@ -1,0 +1,12 @@
+{
+  "id": "perf-blocking-async",
+  "description": "Async HTTP client replaced with synchronous `requests.get` inside an async function, blocking the event loop.",
+  "diff": "diff --git a/fetcher.py b/fetcher.py\n--- a/fetcher.py\n+++ b/fetcher.py\n@@ -1,5 +1,5 @@\n async def fetch_all(urls):\n     results = []\n     for url in urls:\n-        results.append(await httpx_client.get(url))\n+        results.append(requests.get(url))\n     return results\n",
+  "expected": [
+    {
+      "file": "fetcher.py",
+      "line": 4,
+      "category": "performance"
+    }
+  ]
+}

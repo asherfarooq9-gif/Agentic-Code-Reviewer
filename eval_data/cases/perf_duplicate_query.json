@@ -1,0 +1,12 @@
+{
+  "id": "perf-duplicate-query",
+  "description": "Single queryset reused for count+iteration replaced with two identical DB queries for the same data.",
+  "diff": "diff --git a/orders.py b/orders.py\n--- a/orders.py\n+++ b/orders.py\n@@ -1,5 +1,4 @@\n def get_user_summary(user_id):\n-    orders = Order.objects.filter(user_id=user_id, status=\"completed\")\n-    count = orders.count()\n-    total = sum(o.amount for o in orders)\n+    count = Order.objects.filter(user_id=user_id, status=\"completed\").count()\n+    total = sum(o.amount for o in Order.objects.filter(user_id=user_id, status=\"completed\"))\n     return {\"count\": count, \"total\": total}\n",
+  "expected": [
+    {
+      "file": "orders.py",
+      "line": 3,
+      "category": "performance"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "style-magic-number",
+  "description": "Named constant `MAX_RETRIES` replaced with bare literal 3, reducing readability and maintainability.",
+  "diff": "diff --git a/retry.py b/retry.py\n--- a/retry.py\n+++ b/retry.py\n@@ -1,5 +1,2 @@\n-MAX_RETRIES = 3\n-RETRY_DELAY_SECS = 2.0\n-\n def should_retry(attempt):\n-    return attempt < MAX_RETRIES\n+    return attempt < 3\n",
+  "expected": [
+    {
+      "file": "retry.py",
+      "line": 2,
+      "category": "style"
+    }
+  ]
+}

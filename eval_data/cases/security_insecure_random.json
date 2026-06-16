@@ -1,0 +1,12 @@
+{
+  "id": "security-insecure-random",
+  "description": "`secrets.token_urlsafe` replaced with `random.choices` \u2014 non-CSPRNG used for a security token.",
+  "diff": "diff --git a/tokens.py b/tokens.py\n--- a/tokens.py\n+++ b/tokens.py\n@@ -1,2 +1,2 @@\n def generate_reset_token():\n-    return secrets.token_urlsafe(32)\n+    return \"\".join(random.choices(string.ascii_letters + string.digits, k=32))\n",
+  "expected": [
+    {
+      "file": "tokens.py",
+      "line": 2,
+      "category": "security"
+    }
+  ]
+}

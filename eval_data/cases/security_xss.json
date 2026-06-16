@@ -1,0 +1,12 @@
+{
+  "id": "security-xss",
+  "description": "User-supplied name rendered inside `Markup()` without `escape()`, enabling stored XSS.",
+  "diff": "diff --git a/templates.py b/templates.py\n--- a/templates.py\n+++ b/templates.py\n@@ -1,3 +1,3 @@\n def render_greeting(name):\n-    return Markup(\"<p>Hello, %s!</p>\") % escape(name)\n+    return Markup(f\"<p>Hello, {name}!</p>\")\n \n",
+  "expected": [
+    {
+      "file": "templates.py",
+      "line": 2,
+      "category": "security"
+    }
+  ]
+}

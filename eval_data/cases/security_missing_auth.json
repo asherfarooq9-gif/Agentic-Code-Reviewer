@@ -1,0 +1,12 @@
+{
+  "id": "security-missing-auth",
+  "description": "Authentication and admin-role decorators removed from admin endpoint \u2014 now publicly accessible.",
+  "diff": "diff --git a/admin.py b/admin.py\n--- a/admin.py\n+++ b/admin.py\n@@ -1,5 +1,3 @@\n @app.route(\"/admin/users\")\n-@require_login\n-@require_admin\n def list_users():\n     return jsonify(User.query.all())\n",
+  "expected": [
+    {
+      "file": "admin.py",
+      "line": 1,
+      "category": "security"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "bug-loop-mutation",
+  "description": "List copy `[:]` removed; iterating and removing from the same list causes elements to be skipped.",
+  "diff": "diff --git a/cleaner.py b/cleaner.py\n--- a/cleaner.py\n+++ b/cleaner.py\n@@ -1,4 +1,4 @@\n def remove_negatives(numbers):\n-    for n in numbers[:]:\n+    for n in numbers:\n         if n < 0:\n             numbers.remove(n)\n",
+  "expected": [
+    {
+      "file": "cleaner.py",
+      "line": 2,
+      "category": "bug"
+    }
+  ]
+}

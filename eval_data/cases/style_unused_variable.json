@@ -1,0 +1,12 @@
+{
+  "id": "style-unused-variable",
+  "description": "Variance computed and assigned to a local variable that is never returned or used.",
+  "diff": "diff --git a/analytics.py b/analytics.py\n--- a/analytics.py\n+++ b/analytics.py\n@@ -1,3 +1,4 @@\n def calculate_stats(values):\n     mean = sum(values) / len(values)\n+    variance = sum((x - mean) ** 2 for x in values) / len(values)\n     return mean\n",
+  "expected": [
+    {
+      "file": "analytics.py",
+      "line": 3,
+      "category": "style"
+    }
+  ]
+}

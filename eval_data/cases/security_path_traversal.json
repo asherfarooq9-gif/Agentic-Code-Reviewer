@@ -1,0 +1,12 @@
+{
+  "id": "security-path-traversal",
+  "description": "`os.path.basename()` sanitization removed; user-supplied filename can now traverse outside UPLOAD_DIR.",
+  "diff": "diff --git a/files.py b/files.py\n--- a/files.py\n+++ b/files.py\n@@ -1,4 +1,4 @@\n def serve_file(request):\n     filename = request.args.get(\"file\", \"\")\n-    safe_path = os.path.join(UPLOAD_DIR, os.path.basename(filename))\n-    return send_file(safe_path)\n+    file_path = os.path.join(UPLOAD_DIR, filename)\n+    return send_file(file_path)\n",
+  "expected": [
+    {
+      "file": "files.py",
+      "line": 3,
+      "category": "security"
+    }
+  ]
+}

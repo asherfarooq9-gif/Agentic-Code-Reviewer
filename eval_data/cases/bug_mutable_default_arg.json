@@ -1,0 +1,12 @@
+{
+  "id": "bug-mutable-default-arg",
+  "description": "Mutable default argument [] replaces None-guard pattern, causing shared state across calls.",
+  "diff": "diff --git a/utils.py b/utils.py\n--- a/utils.py\n+++ b/utils.py\n@@ -1,6 +1,4 @@\n-def process_items(items, results=None):\n-    if results is None:\n-        results = []\n+def process_items(items, results=[]):\n for item in items:\n     results.append(item * 2)\n return results\n",
+  "expected": [
+    {
+      "file": "utils.py",
+      "line": 1,
+      "category": "bug"
+    }
+  ]
+}

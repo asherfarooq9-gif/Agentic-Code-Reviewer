@@ -1,0 +1,12 @@
+{
+  "id": "perf-regex-in-loop",
+  "description": "Pre-compiled regex constant removed; `re.compile()` now called on every iteration.",
+  "diff": "diff --git a/parser.py b/parser.py\n--- a/parser.py\n+++ b/parser.py\n@@ -1,4 +1,2 @@\n-DATE_RE = re.compile(r\"\\d{4}-\\d{2}-\\d{2}\")\n-\n def find_dates(texts):\n-    return [DATE_RE.findall(t) for t in texts]\n+    return [re.compile(r\"\\d{4}-\\d{2}-\\d{2}\").findall(t) for t in texts]\n",
+  "expected": [
+    {
+      "file": "parser.py",
+      "line": 2,
+      "category": "performance"
+    }
+  ]
+}

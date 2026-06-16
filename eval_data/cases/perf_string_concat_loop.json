@@ -1,0 +1,12 @@
+{
+  "id": "perf-string-concat-loop",
+  "description": "list+join pattern replaced with string `+=` inside a loop \u2014 O(n^2) allocations.",
+  "diff": "diff --git a/report.py b/report.py\n--- a/report.py\n+++ b/report.py\n@@ -1,5 +1,5 @@\n def build_report(rows):\n-    parts = []\n+    result = \"\"\n     for row in rows:\n-        parts.append(f\"{row.name}: {row.value}\\n\")\n-    return \"\".join(parts)\n+        result += f\"{row.name}: {row.value}\\n\"\n+    return result\n",
+  "expected": [
+    {
+      "file": "report.py",
+      "line": 4,
+      "category": "performance"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "style-deep-nesting",
+  "description": "Early-return guard clauses replaced with four levels of nested conditionals.",
+  "diff": "diff --git a/processor.py b/processor.py\n--- a/processor.py\n+++ b/processor.py\n@@ -1,6 +1,7 @@\n def process(data):\n-    if not data:\n-        return None\n-    if not data.get(\"items\"):\n-        return None\n-    return [transform(i) for i in data[\"items\"]]\n+    if data:\n+        if data.get(\"items\"):\n+            items = data[\"items\"]\n+            if items:\n+                return [transform(i) for i in items]\n+    return None\n",
+  "expected": [
+    {
+      "file": "processor.py",
+      "line": 2,
+      "category": "style"
+    }
+  ]
+}
