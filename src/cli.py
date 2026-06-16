@@ -143,6 +143,19 @@ def eval_suite(
     )
 
 
+@app.command("serve")
+def serve(
+    host: str = typer.Option("0.0.0.0", "--host"),
+    port: int = typer.Option(8000, "--port"),
+) -> None:
+    """Run the FastAPI webhook server (auto-reviews PRs on push/open)."""
+    import uvicorn
+
+    from .api.app import create_app
+
+    uvicorn.run(create_app(), host=host, port=port)
+
+
 @app.command("init-db")
 def init_db() -> None:
     """Create or migrate the SQLite database."""

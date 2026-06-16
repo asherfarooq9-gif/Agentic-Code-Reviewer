@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     ollama_host: str = "http://localhost:11434"
     model_default: str = "qwen2.5-coder:7b"
     model_deep: str = "qwen2.5-coder:14b"
+    webhook_secret: str = ""
 
 
 @lru_cache
