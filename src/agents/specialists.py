@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
 from dataclasses import replace
 
 from ..db.models import Category
@@ -77,7 +78,18 @@ def review_diff_multi(
     tools: CodebaseTools | None = None,
 ) -> tuple[list[ReviewFinding], TokenUsage]:
     """Run all specialists concurrently, dedup + score, return (findings, usage)."""
-    raw_findings, usage = asyncio.run(_run_all(files, llm_client, deep, tools))
+    # ProactorEventLoop on Windows causes 'Event loop is closed' errors during
+    # httpx/anyio connection cleanup. Use SelectorEventLoop directly to avoid it.
+    if sys.platform == "win32":
+        loop = asyncio.SelectorEventLoop()
+        try:
+            raw_findings, usage = loop.run_until_complete(
+                _run_all(files, llm_client, deep, tools)
+            )
+        finally:
+            loop.close()
+    else:
+        raw_findings, usage = asyncio.run(_run_all(files, llm_client, deep, tools))
     findings = aggregate(raw_findings)
     logger.info("Multi-agent review produced %d finding(s)", len(findings))
     return findings, usage
