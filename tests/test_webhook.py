@@ -8,8 +8,8 @@ def _sign(secret: str, body: bytes) -> str:
     return "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
 
 
-def test_verify_no_secret_skips():
-    assert verify_signature("", b"anything", None) is True
+def test_verify_empty_secret_fails():
+    assert verify_signature("", b"anything", None) is False
 
 
 def test_verify_valid_signature():

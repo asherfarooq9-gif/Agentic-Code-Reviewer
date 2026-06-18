@@ -8,9 +8,7 @@ _RELEVANT_ACTIONS = {"opened", "synchronize", "reopened"}
 
 
 def verify_signature(secret: str, body: bytes, signature_header: str | None) -> bool:
-    """Verify the GitHub X-Hub-Signature-256 HMAC. Empty secret skips (dev only)."""
-    if not secret:
-        return True
+    """Verify the GitHub X-Hub-Signature-256 HMAC."""
     if not signature_header or not signature_header.startswith("sha256="):
         return False
     expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
@@ -19,10 +17,17 @@ def verify_signature(secret: str, body: bytes, signature_header: str | None) -> 
 
 def parse_pull_request_event(payload: dict) -> dict | None:
     """Return {action, url, number} for review-worthy PR events, else None."""
+    if not isinstance(payload, dict):
+        return None
     if payload.get("action") not in _RELEVANT_ACTIONS:
         return None
-    pull = payload.get("pull_request") or {}
-    url = pull.get("html_url")
-    if not url:
+    pull = payload.get("pull_request")
+    if not isinstance(pull, dict):
         return None
-    return {"action": payload["action"], "url": url, "number": pull.get("number")}
+    url = pull.get("html_url")
+    if not isinstance(url, str) or not url:
+        return None
+    number = pull.get("number")
+    if not isinstance(number, int):
+        return None
+    return {"action": payload["action"], "url": url, "number": number}

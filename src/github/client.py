@@ -8,7 +8,7 @@ import requests
 from github import Auth, Github
 
 _PR_URL_RE = re.compile(
-    r"github\.com/(?P<owner>[^/\s]+)/(?P<repo>[^/\s]+)/pull/(?P<number>\d+)"
+    r"^https://github\.com/(?P<owner>[^/\s]+)/(?P<repo>[^/\s]+)/pull/(?P<number>\d+)(?:[/?#].*)?$"
 )
 _DEFAULT_TIMEOUT = 30
 
@@ -17,7 +17,7 @@ def parse_pr_url(url: str) -> tuple[str, str, int]:
     """Extract (owner, repo, number) from a GitHub PR URL. Raises ValueError."""
     if not url or not isinstance(url, str):
         raise ValueError("PR URL must be a non-empty string")
-    match = _PR_URL_RE.search(url.strip())
+    match = _PR_URL_RE.match(url.strip())
     if not match:
         raise ValueError(f"Not a valid GitHub PR URL: {url!r}")
     return match["owner"], match["repo"], int(match["number"])
@@ -55,5 +55,10 @@ class GitHubClient:
             raise ValueError(f"PR not found (404): {url}")
         if resp.status_code == 403 and "rate limit" in resp.text.lower():
             raise RuntimeError("GitHub API rate limit exceeded")
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            raise RuntimeError(
+                f"GitHub API error {exc.response.status_code} fetching PR diff"
+            ) from None
         return resp.text
